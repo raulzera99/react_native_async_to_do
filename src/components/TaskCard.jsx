@@ -1,59 +1,61 @@
-// TaskCard.js
-
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { Button } from "@react-native-material/core";
+import { View, Text, StyleSheet, TouchableHighlight } from "react-native";
+import { Button, Card, CheckBox } from "@rneui/themed";
+import Icon from "react-native-vector-icons/FontAwesome";
 
-const TaskCard = ({ task, onPress }) => {
+const TaskCard = ({ task, onPress, onPressEdit, onToggle }) => {
   return (
-    <View style={styles.card}>
-      <Button
-        title={task.title}
-        onPress={onPress}
-        style={styles.taskButton}
-        color="#007AFF" // Cor do botão
-      />
-      <Text style={styles.description}>{task.description}</Text>
-      <View style={styles.dateContainer}>
-        <Text style={styles.dateLabel}>Data:</Text>
-        <Text style={styles.dateValue}>
-          {new Date(task.date).toLocaleString()}
+    <TouchableHighlight onPress={onPress} underlayColor="transparent">
+      <Card style={styles.card}>
+        <Card.Title style={styles.title}>{task.title}</Card.Title>
+        <Card.Divider />
+        <Text style={styles.description}>{task.description}</Text>
+        <Text style={styles.date}>
+          Data de Término: {new Date(task.date).toLocaleString()}
         </Text>
-      </View>
-    </View>
+        <View style={styles.footer}>
+          <Button
+            icon={<Icon name="edit" color="#ffffff" />}
+            buttonStyle={styles.editButton}
+            title=" EDITAR"
+            onPress={onPressEdit}
+          />
+          <CheckBox
+            title="Concluída"
+            {...(task.status === "realizada" ? { checked: true } : {}) }
+            onPress={onToggle}
+          />
+        </View>
+      </Card>
+    </TouchableHighlight>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-  },
-  taskButton: {
     marginBottom: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
   },
   description: {
     fontSize: 16,
     marginBottom: 10,
     color: "#333",
   },
-  dateContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  dateLabel: {
-    fontWeight: "bold",
-    marginRight: 5,
-  },
-  dateValue: {
+  date: {
+    fontSize: 14,
     color: "#555",
+    marginBottom: 5,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  editButton: {
+    backgroundColor: "#b0b0b0",
+    borderRadius: 5,
   },
 });
 

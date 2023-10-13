@@ -7,6 +7,7 @@ import HomeScreen from "../screens/HomeScreen";
 import AddTaskScreen from "../screens/AddTaskScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import TaskDetailsScreen from "../screens/TaskDetailsScreen";
+import EditTaskScreen from "../screens/EditTaskScreen";
 import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
 
@@ -57,19 +58,17 @@ const MainTabs = () => (
   </Tab.Navigator>
 );
 
-const AppNavigator = () => {
+const AppNavigator = (isAuthenticated) => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName={isAuthenticated ? "MainTabs" : "Login"}>
         <Stack.Screen
           name="MainTabs"
           component={MainTabs}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="TaskDetails"
-          component={TaskDetailsScreen}
-        />
+        <Stack.Screen name="TaskDetails" component={TaskDetailsScreen} />
+        <Stack.Screen name="EditTaskScreen" component={EditTaskScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
       </Stack.Navigator>

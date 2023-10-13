@@ -1,21 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { TextInput, Button } from "@react-native-material/core";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { v4 as uuidv4 } from "uuid";
 
-const AddTaskScreen = ({ navigation }) => {
+const EditTaskScreen = ({ navigation, route }) => {
+  const { taskId } = route.params;
+  const [task, setTask] = useState(null);
+
+  useEffect(() => {
+    const fetchTask = async () => {
+      try {
+        const tasks = await AsyncStorage.getItem("tasks");
+        const taskArray = JSON.parse(tasks) || [];
+
+        const selectedTask = taskArray.find((item) => item.id === taskId);
+        setTask(selectedTask);
+      } catch (error) {
+        console.error("Erro ao buscar tarefa para edição: ", error);
+      }
+    };
+
+    fetchTask();
+  }, [taskId]);
+
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDate, setTaskDate] = useState(new Date());
   const [taskStatus, setTaskStatus] = useState("aberta");
 
-  const saveTask = async () => {
+  useEffect(() => {
+    if (task) {
+      setTaskTitle(task.title);
+      setTaskDescription(task.description);
+      setTaskDate(new Date(task.date));
+      setTaskStatus(task.status);
+    }
+  }, [task]);
+
+  const saveEditedTask = async () => {
     try {
-      const task = {
-        id: uuidv4(),
+      const editedTask = {
+        id: taskId,
         title: taskTitle,
         description: taskDescription,
         date: taskDate,
@@ -25,21 +52,24 @@ const AddTaskScreen = ({ navigation }) => {
       const tasks = await AsyncStorage.getItem("tasks");
       const taskArray = JSON.parse(tasks) || [];
 
-      taskArray.push(task);
-      await AsyncStorage.setItem("tasks", JSON.stringify(taskArray));
+      const updatedTasks = taskArray.map((task) =>
+        task.id === editedTask.id ? editedTask : task
+      );
+
+      await AsyncStorage.setItem("tasks", JSON.stringify(updatedTasks));
 
       navigation.reset({
         index: 0,
-        routes: [{ name: "Home" }],
+        routes: [{ name: "MainTabs" }],
       });
     } catch (error) {
-      console.error("Erro ao salvar tarefa: ", error);
+      console.error("Erro ao salvar tarefa editada: ", error);
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Adicionar Tarefa</Text>
+      <Text style={styles.header}>Editar Tarefa</Text>
       <TextInput
         style={styles.input}
         placeholder="Título da Tarefa"
@@ -76,7 +106,11 @@ const AddTaskScreen = ({ navigation }) => {
         <Picker.Item label="Atrasada" value="atrasada" />
         <Picker.Item label="Cancelada" value="cancelada" />
       </Picker>
-      <Button title="Salvar" onPress={saveTask} style={styles.button} />
+      <Button
+        title="Salvar Edição"
+        onPress={saveEditedTask}
+        style={styles.button}
+      />
     </ScrollView>
   );
 };
@@ -104,4 +138,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddTaskScreen;
+export default EditTaskScreen;
